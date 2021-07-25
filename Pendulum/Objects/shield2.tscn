@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://sprites/shield_2.png" type="Texture" id=1]
+[ext_resource path="res://Objects/color.shader" type="Shader" id=2]
+[ext_resource path="res://scripts/shield.gd" type="Script" id=3]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 2 )
+shader_param/color = Color( 0.941176, 0.882353, 0.0352941, 1 )
+
+[node name="Area2D" type="Area2D"]
+scale = Vector2( 3, 2 )
+script = ExtResource( 3 )
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 1 )
+position = Vector2( -0.280617, -0.841843 )
+texture = ExtResource( 1 )
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PoolVector2Array( -47.5855, -36.7968, -29.9068, -41.2867, -13.9117, -43.5316, -0.161591, -44.654, 13.5885, -42.9703, 28.4612, -41.006, 42.2113, -38.1999, 42.4919, -32.8682, 36.599, -32.5876, 23.4101, -35.3937, 10.5018, -37.9193, -0.4422, -39.603, -13.9117, -38.4805, -29.6262, -35.955, -47.5855, -32.0264 )
+
+[node name="CollisionPolygon2D2" type="CollisionPolygon2D" parent="."]
+polygon = PoolVector2Array( -48.4274, 38.6886, -31.5905, 33.9182, -16.1566, 31.112, -1.84528, 30.2702, 11.6243, 31.3927, 26.7775, 34.1988, 42.4919, 37.5662, 42.4919, 42.6173, 37.1602, 42.056, 25.9356, 39.8111, 11.6243, 37.005, -1.84528, 35.8825, -15.5954, 36.7243, -31.8711, 39.5305, -45.6212, 42.6173, -48.708, 42.3366 )
