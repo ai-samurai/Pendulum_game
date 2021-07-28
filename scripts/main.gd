@@ -4,7 +4,11 @@ export (NodePath) var ui_label_value_path
 
 onready var shot = load("res://Objects/shot.tscn")
 onready var shield = load("res://Objects/shield2.tscn")
+onready var bomb = load("res://Objects/Bomb.tscn")
+onready var normal = load("res://Objects/normal.tscn")
 onready var ui_label_value = get_node(ui_label_value_path)
+
+var shots
 
 var shield_allowed = true # boolean to control shield availability
 
@@ -43,6 +47,7 @@ var sb_color # to change the color of the shield bar, when block_shield = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	shots = [normal, bomb]
 	#$ParallaxBackground/ParallaxLayer.motion_mirroring = $ParallaxBackground/ParallaxLayer/Sprite.texture.get_size().rotated(sprite.global_rotation)
 
 	sb = self.get_node("sb")
@@ -85,23 +90,29 @@ func add_timer(timer_name, time, timer_function):
 func hit(area):
 	var rand_dir = pow(-1, randi() % 2)
 	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
-	var new_shot
-	new_shot = shot.instance()
+	
+	var new_shot_index = gv.shot_types[randi() % gv.shot_types.size()]
+	var new_shot = shots[new_shot_index].instance()
 	new_shot.position = pos
 	add_child(new_shot)
-	#print(self.get_node(new_shot.name).type_name)
-	self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
-	self.get_node(new_shot.name).connect("line_hit", self, "_line_hit")
+	#self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
+	#self.get_node(new_shot.name).connect("line_hit", self, "_line_hit")
+	
 	
 # to do when shot hits the shield, for various actions such as increasing lives,
 #	bonus to score, increasing shot speed, decreasing lives
-func _shield_hit(type):
+func _shield_hit(node):
 	#gv.background_speed += 100
-	if gv.mode == 1:
-		if type == 2:
-			gv.bt_life += 1
+	#gv.score += 2
+	#score_label.text = "Score: " + str(gv.score)
+	#print(gv.score)
+	pass	 
+	
 			
 func _line_hit(type):
+	#gv.score -= 1
+	#score_label.text = "Score: " + str(gv.score)
+	#print(gv.score)
 	pass
 
 # to do when shot hits button
@@ -124,7 +135,7 @@ func add_shield():
 # to do when shield is hit with a shot, for counting score
 func shield_hit(node):
 	# check shot is from which side and increase shot count accordingly
-	if node.position.x < 240:
+	"""if node.position.x < 240:
 		right_shot_count = 0
 		if left_shot_count <= 2: 
 			gv.score += 1
@@ -136,7 +147,8 @@ func shield_hit(node):
 			gv.score += 1
 			right_shot_count += 1
 		else: pass
-	score_label.text = "Score: "+ str(gv.score)
+	score_label.text = "Score: "+ str(gv.score)"""
+	pass
 	
 # set allow shields to true, part of process stop player from spamming shields
 func _on_cooldown_timeout_complete():
@@ -188,7 +200,7 @@ func _process(delta):
 			move_block(b1)
 			move_block(b2)
 	else: pass
-	
+	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.bt_life)
 	
 # to create binary to feed into _on_block_cooldown_timeout_complete 
