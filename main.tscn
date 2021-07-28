@@ -21,13 +21,13 @@ position = Vector2( 240, 750 )
 scale = Vector2( 2.25, 1.5 )
 
 [node name="pendulum" parent="." instance=ExtResource( 3 )]
-position = Vector2( 240, 20 )
+position = Vector2( 240, 60 )
 
 [node name="block_1" parent="." instance=ExtResource( 6 )]
-position = Vector2( 120, 220 )
+position = Vector2( 120, 80 )
 
 [node name="block_2" parent="." instance=ExtResource( 6 )]
-position = Vector2( 360, 220 )
+position = Vector2( 360, 80 )
 
 [node name="sb" type="ProgressBar" parent="."]
 margin_left = 180.0

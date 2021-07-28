@@ -23,7 +23,6 @@ var score_label # score label
 var lives_label # player lives label
 
 
-
 var left_shot_count = 0 # to stop score increase after x captures on left 
 var right_shot_count = 0 # to stop score increase after x captures on right
 
@@ -85,7 +84,7 @@ func add_timer(timer_name, time, timer_function):
 # create shot when pendulum hits an area
 func hit(area):
 	var rand_dir = pow(-1, randi() % 2)
-	var pos = Vector2(area.position.x + (rand_dir*20), bt.position.y - 450)
+	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
 	var new_shot
 	new_shot = shot.instance()
 	new_shot.position = pos
@@ -93,10 +92,11 @@ func hit(area):
 	#print(self.get_node(new_shot.name).type_name)
 	self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
 	self.get_node(new_shot.name).connect("line_hit", self, "_line_hit")
+	
 # to do when shot hits the shield, for various actions such as increasing lives,
 #	bonus to score, increasing shot speed, decreasing lives
 func _shield_hit(type):
-	gv.background_speed += 100
+	#gv.background_speed += 100
 	if gv.mode == 1:
 		if type == 2:
 			gv.bt_life += 1
@@ -166,12 +166,16 @@ func _process(delta):
 		shield_allowed = true
 	sb.value = float(shield_load/3.0) * 100
 
+	# if block_1 too far from center stop further movement
 	if b1.position.x < 50:
 		move_left = false
-	if b1.position.x > 140:
+	# if block_1 gets too close to center stop further movement
+	if b1.position.x > 240 - gv.min_gap:
 		move_left = true
-	if b2.position.x < 340:
+	# if block_2 gets too close to center stop further movement
+	if b2.position.x < 240 + gv.min_gap:
 		move_right = true
+	# if block_2 too far from center stop further movement
 	if b2.position.x > 430:
 		move_right = false
 	
@@ -221,11 +225,14 @@ func _block_movement(state):
 # to move a block depending upon direction requirement
 func move_block(block):
 	if block == b1:
+		# if left movement allowed move left
 		if move_left == true:
 			b1.position.x -= gv.block_speed
+		# if left movement not allowed move right
 		elif move_left == false:
 			b1.position.x += gv.block_speed
 	if block == b2:
+		# same as b1 but opposite directions
 		if move_right == true:
 			b2.position.x += gv.block_speed
 		elif move_right == false:

@@ -7,6 +7,7 @@
 extents = Vector2( 17.9443, 101.613 )
 
 [node name="Area2D" type="Area2D"]
+scale = Vector2( 1, 0.2 )
 script = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
@@ -15,6 +16,5 @@ centered = false
 offset = Vector2( -60, -23 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
 position = Vector2( -0.592491, 101.573 )
 shape = SubResource( 1 )
