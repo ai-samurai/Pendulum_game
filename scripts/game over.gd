@@ -8,6 +8,9 @@ func _ready():
 
 
 func _on_restartButton_pressed():
+	print("restart button pressed")
+	gv.score = 0
+	gv.lives = 3
 	get_tree().change_scene("res://main.tscn")
 
 

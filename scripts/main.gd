@@ -4,11 +4,11 @@ export (NodePath) var ui_label_value_path
 
 onready var shot = load("res://Objects/shot.tscn")
 onready var shield = load("res://Objects/shield2.tscn")
-onready var bomb = load("res://Objects/Bomb.tscn")
-onready var normal = load("res://Objects/normal.tscn")
+
 onready var ui_label_value = get_node(ui_label_value_path)
 
 var shots
+var shots_index = []
 
 var shield_allowed = true # boolean to control shield availability
 
@@ -47,7 +47,10 @@ var sb_color # to change the color of the shield bar, when block_shield = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	shots = [normal, bomb]
+	shots = gv.shot_scenes
+	gv.velocity = gv.default_velocity
+	for i in range(shots.size()):
+		shots_index.push_back(i)
 	#$ParallaxBackground/ParallaxLayer.motion_mirroring = $ParallaxBackground/ParallaxLayer/Sprite.texture.get_size().rotated(sprite.global_rotation)
 
 	sb = self.get_node("sb")
@@ -91,7 +94,7 @@ func hit(area):
 	var rand_dir = pow(-1, randi() % 2)
 	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
 	
-	var new_shot_index = gv.shot_types[randi() % gv.shot_types.size()]
+	var new_shot_index = shots_index[randi() % shots_index.size()]
 	var new_shot = shots[new_shot_index].instance()
 	new_shot.position = pos
 	add_child(new_shot)
@@ -118,7 +121,7 @@ func _line_hit(type):
 # to do when shot hits button
 func button_hit(node):
 	#bt_life -= 1
-	if gv.bt_life == 0:
+	if gv.lives == 0:
 		get_tree().change_scene("game over.tscn")
 	
 
@@ -163,6 +166,8 @@ func _on_block_shield_timeout_complete():
 	
 
 func _process(delta):
+	if gv.lives <= 0:
+		get_tree().change_scene("game over.tscn")
 	# do not allow shields to be generated if # of shields generated is greater
 	# 	than the shield limit, in a finite period. 
 	if shield_load >= gv.shield_limit:
@@ -201,7 +206,7 @@ func _process(delta):
 			move_block(b2)
 	else: pass
 	score_label.text = "Score: " + str(gv.score)
-	lives_label.text = "Lives: " + str(gv.bt_life)
+	lives_label.text = "Lives: " + str(gv.lives)
 	
 # to create binary to feed into _on_block_cooldown_timeout_complete 
 #	this is used to control the movement of the blocks. A lower probability 

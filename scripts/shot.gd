@@ -7,7 +7,7 @@ var shot_tex1 = preload("res://sprites/shot_health.png")
 
 #var rng = RandomNumberGenerator.new()
 
-var velocity = gv.velocity
+#var velocity = gv.velocity
 
 var main
 
@@ -22,11 +22,22 @@ func _ready():
 	
 	
 func _process(delta):
-	self.position.y += velocity
-
+	self.position.y += gv.velocity
+	
+# if the shot enters another area
 func _hit(area):
 	if "shield" in area.name:
-		gv.score += 2
+		if type == "normal":
+			gv.score += 2
+		elif type == "health":
+			if gv.lives <= 9:
+				gv.lives += 1
+			else: pass
+		elif type == "bonus":
+			gv.score += 10
+		elif type == "portal":
+			print("hit portal")
+			get_tree().change_scene("portal_scene.tscn")
 		queue_free()
 	elif "line" in area.name:
 		if type == "normal":
@@ -37,6 +48,11 @@ func _hit(area):
 			if gv.score-10 < 0:
 				gv.score = 0
 			else: gv.score -= 10
+		elif type == "critical":
+			gv.lives -= 2
+		queue_free()
+	elif "button" in area.name:
+		gv.lives -= 1
 		queue_free()
 	else: pass
 			
