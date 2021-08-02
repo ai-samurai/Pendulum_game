@@ -94,8 +94,15 @@ func hit(area):
 	var rand_dir = pow(-1, randi() % 2)
 	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
 	
-	var new_shot_index = shots_index[randi() % shots_index.size()]
-	var new_shot = shots[new_shot_index].instance()
+	#var new_shot_index = shots_index[randi() % shots_index.size()]
+	#var new_shot_index
+	#var prob_value = randi() % gv.shots_weight_sum 
+	#for shot in gv.shot_weights.keys():
+	#	if prob_value <= gv.shot_weights[shot]: 
+	#		new_shot_index = gv.shot_names.fint(shot,0)
+	
+	var new_shot = gv.pick_shot().instance()
+	
 	new_shot.position = pos
 	add_child(new_shot)
 	#self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
@@ -274,3 +281,6 @@ func _input(event):
 			shield_load += shield_load_rate
 		if shield_allowed == false:
 			pass
+
+
+	

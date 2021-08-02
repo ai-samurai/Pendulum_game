@@ -19,6 +19,8 @@ func _ready():
 	type = self.get_node("type").editor_description
 	#rng.randomize()
 	connect("area_entered", self, "_hit")
+	if type == "portal":
+		$AnimationPlayer.play("warp")
 	
 	
 func _process(delta):
@@ -36,7 +38,6 @@ func _hit(area):
 		elif type == "bonus":
 			gv.score += 10
 		elif type == "portal":
-			print("hit portal")
 			get_tree().change_scene("portal_scene.tscn")
 		queue_free()
 	elif "line" in area.name:

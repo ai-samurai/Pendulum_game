@@ -8,7 +8,6 @@ onready var bonus = load("res://Objects/bonus.tscn")
 onready var portal = load("res://Objects/portal.tscn")
 
 var score
-var mode
 var velocity
 var pendulum_velocity = 200
 var background_speed = 100
@@ -23,15 +22,38 @@ var min_gap = 50 # 1/2 of min gap between the two stop blocks
 var shot_type_indices = {"normal":0, "bomb":1, "health":2, "critical":3, "bonus":4, "portal":5}
 var shot_types = [] #[0,1] #,2,3,4,5]
 var shot_scenes
-var shot_names = []
-var default_velocity = 4
+var shot_names
+var default_velocity = 6
 var portal_cooldown_time
 var portal_shots_limit
+var shot_weights = {"normal":5, "bomb":3, "health":2, "critical":1, "bonus":2, "portal":1}
+var shot_weights_sum = 0 # to store sum of weightings for shot creation
+var shot_accweights = []
+var rng = RandomNumberGenerator.new()
 
 func _ready():
 	shot_scenes = [normal, bomb, health, critical, bonus, portal]
-	mode = 1
+	shot_names = ["normal", "bomb", "health", "critical", "bonus", "portal"]
 	score = 0
 	velocity = default_velocity
 	portal_cooldown_time = 10
 	portal_shots_limit = 21
+	#for weight in shot_weights.values():
+	#	shots_weight_sum += weight
+	#print(shots_weight_sum)
+	for shot in shot_names:
+		shot_weights_sum += shot_weights[shot]
+		shot_accweights.push_back(shot_weights_sum)
+
+	
+func pick_shot():
+	# roll a random number
+	#var roll:int = rand_range(0,shot_weights_sum) 
+	var roll:int = rng.randi_range(0, shot_weights_sum)
+
+	
+	# loop through shot_weights array to choose first shot with accweight > roll
+	for accweight in shot_accweights:
+		if accweight >= roll:
+			return shot_scenes[shot_accweights.find(accweight, 0)]
+			
