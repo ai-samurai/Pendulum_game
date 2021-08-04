@@ -1,0 +1,6 @@
+/home/tanmay/Godot/Pendulum/.mono/temp/bin/Debug/Pendulum.dll
+/home/tanmay/Godot/Pendulum/.mono/temp/bin/Debug/Pendulum.pdb
+/home/tanmay/Godot/Pendulum/.mono/temp/obj/Debug/Pendulum.csprojAssemblyReference.cache
+/home/tanmay/Godot/Pendulum/.mono/temp/obj/Debug/Pendulum.csproj.CoreCompileInputs.cache
+/home/tanmay/Godot/Pendulum/.mono/temp/obj/Debug/Pendulum.dll
+/home/tanmay/Godot/Pendulum/.mono/temp/obj/Debug/Pendulum.pdb
