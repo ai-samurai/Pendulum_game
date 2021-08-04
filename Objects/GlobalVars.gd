@@ -18,7 +18,7 @@ var block_cooldown_time = 2 # minimum time block will move once movement starts
 var block_speed = 2 # speed at which blocks shoudl move 
 var bt_pos = Vector2(240, 750) # button position
 var lives = 3 # button lives
-var min_gap = 50 # 1/2 of min gap between the two stop blocks
+var min_gap = 100 # 1/2 of min gap between the two stop blocks
 var shot_type_indices = {"normal":0, "bomb":1, "health":2, "critical":3, "bonus":4, "portal":5}
 var shot_types = [] #[0,1] #,2,3,4,5]
 var shot_scenes
@@ -56,4 +56,26 @@ func pick_shot():
 	for accweight in shot_accweights:
 		if accweight >= roll:
 			return shot_scenes[shot_accweights.find(accweight, 0)]
-			
+
+
+# to create binary to feed into _on_block_cooldown_timeout_complete() in both 
+# 	main and portal_scene scripts.
+#	this is used to control the movement of the blocks. 
+#	a lower probability of movement is assigned if blocks are closer. 
+#	returning true stops the blocks
+func _block_stop(b1, b2):
+	rng.randomize()
+	var n = rng.randi_range(1, 10)
+	# if blocks are more than 300 pixels apart stop only 10% of the time
+	if b2.position.x - b1.position.x > 300:
+		if n < 1: return true
+		else: return false
+	# if blocks are less than 200 pixels apart stop 80% of the time
+	elif b2.position.x - b1.position.x < 200:
+		if n < 8: return true
+		else: return false
+	# if blocks are not closer than 200 pixels and further apart than 300 then
+	#	stop only 30% of the time
+	else:
+		if n < 3: return true
+		else: return false

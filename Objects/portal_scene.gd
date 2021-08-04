@@ -7,6 +7,8 @@ onready var shield = load("res://Objects/shield2.tscn")
 
 onready var ui_label_value = get_node(ui_label_value_path)
 
+var main
+
 var shots
 var shots_index = []
 
@@ -66,6 +68,10 @@ func _ready():
 	score_label = self.get_node("score_label")
 	lives_label = self.get_node("lives_label")
 	bt.position = gv.bt_pos
+	
+	# get main scene
+	main = get_tree().root.get_child(1)
+	print("main: "+ main.name)
 	
 	# starts when a shield is created
 	shield_timer_cooldown = add_timer("timer_pause", gv.shield_cooldown_time, "_on_cooldown_timeout_complete")
@@ -221,7 +227,7 @@ func _process(delta):
 #	this is used to control the movement of the blocks. A lower probability 
 #	of movement is assigned if blocks are closer.
 func _block_stop():
-	rng.randomize()
+	"""rng.randomize()
 	var n = rng.randi_range(1, 10)
 	if b2.position.x - b1.position.x > 300:
 		if n < 1: return true
@@ -231,11 +237,13 @@ func _block_stop():
 		else: return false
 	else:
 		if n < 3: return true
-		else: return false
+		else: return false"""
+	#main._block_stop()
+	pass
 	
 # to signal block movement complete after block_cooldown
 func _on_block_cooldown_timeout_complete():
-	_block_movement(_block_stop())
+	_block_movement(gv._block_stop(b1, b2))
 	
 	
 # to start timer and start or stop block

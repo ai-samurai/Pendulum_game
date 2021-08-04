@@ -193,11 +193,11 @@ func _process(delta):
 	# if block_1 too far from center stop further movement
 	if b1.position.x < 50:
 		move_left = false
-	# if block_1 gets too close to center stop further movement
-	if b1.position.x > 240 - gv.min_gap:
+	# if block_1 gets too close to other block
+	if b1.position.x > b2.position.x - gv.min_gap:
 		move_left = true
-	# if block_2 gets too close to center stop further movement
-	if b2.position.x < 240 + gv.min_gap:
+	# if block_2 gets too close to other block
+	if b2.position.x < b1.position.x + gv.min_gap:
 		move_right = true
 	# if block_2 too far from center stop further movement
 	if b2.position.x > 430:
@@ -215,25 +215,11 @@ func _process(delta):
 	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.lives)
 	
-# to create binary to feed into _on_block_cooldown_timeout_complete 
-#	this is used to control the movement of the blocks. A lower probability 
-#	of movement is assigned if blocks are closer.
-func _block_stop():
-	rng.randomize()
-	var n = rng.randi_range(1, 10)
-	if b2.position.x - b1.position.x > 300:
-		if n < 1: return true
-		else: return false
-	elif b2.position.x - b1.position.x < 280:
-		if n < 8: return true
-		else: return false
-	else:
-		if n < 3: return true
-		else: return false
+
 	
 # to signal block movement complete after block_cooldown
 func _on_block_cooldown_timeout_complete():
-	_block_movement(_block_stop())
+	_block_movement(gv._block_stop(b1, b2))
 	
 	
 # to start timer and start or stop block

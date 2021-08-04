@@ -15,7 +15,7 @@ var type
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	main = get_tree().root.get_child(0)
+	main = get_tree().root.get_child(1)
 	type = self.get_node("type").editor_description
 	#rng.randomize()
 	connect("area_entered", self, "_hit")
