@@ -9,6 +9,10 @@ onready var ui_label_value = get_node(ui_label_value_path)
 
 var shots
 var shots_index = []
+# to track on which side of pendulum was last shot created. -1 is for left side
+# and +1 is for right side
+var shot_dir = -1 
+var shot_interval # timer to control the interval between successive shots
 
 var shield_allowed = true # boolean to control shield availability
 
@@ -18,8 +22,6 @@ var block_shield_timer # timer for block_shield_time
 var shield_load_rate = 1 # to allow other shield cooldown rates in the future
 var shield_load = 0 # to calculate shields generated in quick succession
 var sb # shield bar, to show shield availability
-var b1 # block 1
-var b2 # block 2
 var bt # button
 var p # pendulum
 var l # line
@@ -33,12 +35,7 @@ var right_shot_count = 0 # to stop score increase after x captures on right
 var block_cooldown # timer to control block movement
 
 var rng = RandomNumberGenerator.new()
-var move_block = true # binary to control movement of blocks
 
-var move_left = true # binary to restrain block movement within desired range
-var move_right = true # binary like move_left but for right side
-var blocks = [1,2,3,3] # to control probability of which block/s should move
-var choice # to store the return from blocks array random selection
 var stop_shield = false # stop another shield from being genereated when one 
 #	already present
 var sb_color # to change the color of the shield bar, when block_shield = true
@@ -47,15 +44,13 @@ var sb_color # to change the color of the shield bar, when block_shield = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	rng.randomize()
 	shots = gv.shot_scenes
-	gv.velocity = gv.default_velocity
+	#gv.velocity = gv.default_velocity
 	for i in range(shots.size()):
 		shots_index.push_back(i)
-	#$ParallaxBackground/ParallaxLayer.motion_mirroring = $ParallaxBackground/ParallaxLayer/Sprite.texture.get_size().rotated(sprite.global_rotation)
 
 	sb = self.get_node("sb")
-	b1 = self.get_node("block_1")
-	b2 = self.get_node("block_2")
 	bt = self.get_node("button")
 	p = self.get_node("pendulum")
 	l = self.get_node("line")
@@ -69,61 +64,46 @@ func _ready():
 	# starts when too many shields created in a finite period (shield_limit)
 	block_shield_timer = add_timer("block_shield_timer", gv.block_shield_time, "_on_block_shield_timeout_complete")
 	
-	self.get_node("pendulum").connect("area_entered" , self, "hit")
 	self.get_node("button").connect("area_entered", self, "button_hit")
 	block_cooldown = add_timer("block_timer", gv.block_cooldown_time, "_on_block_cooldown_timeout_complete")
 	block_cooldown.start()
 	
+	
+	shot_interval = add_timer("shot_interval", gv.shot_interval, "_on_shot_interval_timeout_complete", false)
+	shot_interval.start()
+	gv.connect("shot_interval_changed", self, "_on_shot_interval_changed")
 	# shield bar color
 	sb_color = sb.get("custom_styles/bg")
 	sb_color.bg_color = Color(255, 255, 255)
 	#print(sb_color)
 
 # add a timer to the main_scene
-func add_timer(timer_name, time, timer_function):
+func add_timer(timer_name, time, timer_function, one_shot=true):
 	var timer = Timer.new()
-	timer.set_one_shot(true)
+	timer.set_one_shot(one_shot)
 	timer.set_wait_time(time)
 	add_child(timer)
 	timer.name = timer_name
 	timer.connect("timeout", self, timer_function)
 	return timer
 
-# create shot when pendulum hits an area
-func hit(area):
-	var rand_dir = pow(-1, randi() % 2)
-	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
+
+func _on_shot_interval_changed():
+	shot_interval.set_wait_time(gv.shot_interval)
+
+# on shot interval completion
+func _on_shot_interval_timeout_complete():
+	shot_dir = -1 * shot_dir
+	create_shot()
 	
-	#var new_shot_index = shots_index[randi() % shots_index.size()]
-	#var new_shot_index
-	#var prob_value = randi() % gv.shots_weight_sum 
-	#for shot in gv.shot_weights.keys():
-	#	if prob_value <= gv.shot_weights[shot]: 
-	#		new_shot_index = gv.shot_names.fint(shot,0)
-	
+# create shot at random times
+func create_shot():
+	var xpos = (shot_dir * gv.gap) + p.position.x
 	var new_shot = gv.pick_shot().instance()
-	
-	new_shot.position = pos
+	new_shot.position = Vector2(xpos, p.position.y + 50)
 	add_child(new_shot)
-	#self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
-	#self.get_node(new_shot.name).connect("line_hit", self, "_line_hit")
-	
-	
-# to do when shot hits the shield, for various actions such as increasing lives,
-#	bonus to score, increasing shot speed, decreasing lives
-func _shield_hit(node):
-	#gv.background_speed += 100
-	#gv.score += 2
-	#score_label.text = "Score: " + str(gv.score)
-	#print(gv.score)
-	pass	 
-	
-			
-func _line_hit(type):
-	#gv.score -= 1
-	#score_label.text = "Score: " + str(gv.score)
-	#print(gv.score)
-	pass
+	print(gv.velocity)
+		
 
 # to do when shot hits button
 func button_hit(node):
@@ -142,23 +122,6 @@ func add_shield():
 	add_child(new_shield)
 	self.get_node(new_shield.name).connect("area_entered", self, "shield_hit")
 	
-# to do when shield is hit with a shot, for counting score
-func shield_hit(node):
-	# check shot is from which side and increase shot count accordingly
-	"""if node.position.x < 240:
-		right_shot_count = 0
-		if left_shot_count <= 2: 
-			gv.score += 1
-			left_shot_count += 1
-		else: pass
-	else:
-		left_shot_count = 0
-		if right_shot_count <= 2: 
-			gv.score += 1
-			right_shot_count += 1
-		else: pass
-	score_label.text = "Score: "+ str(gv.score)"""
-	pass
 	
 # set allow shields to true, part of process stop player from spamming shields
 func _on_cooldown_timeout_complete():
@@ -173,6 +136,7 @@ func _on_block_shield_timeout_complete():
 	
 
 func _process(delta):
+	
 	if gv.lives <= 0:
 		get_tree().change_scene("game over.tscn")
 	# do not allow shields to be generated if # of shields generated is greater
@@ -190,63 +154,10 @@ func _process(delta):
 		shield_allowed = true
 	sb.value = float(shield_load/3.0) * 100
 
-	# if block_1 too far from center stop further movement
-	if b1.position.x < 50:
-		move_left = false
-	# if block_1 gets too close to other block
-	if b1.position.x > b2.position.x - gv.min_gap:
-		move_left = true
-	# if block_2 gets too close to other block
-	if b2.position.x < b1.position.x + gv.min_gap:
-		move_right = true
-	# if block_2 too far from center stop further movement
-	if b2.position.x > 430:
-		move_right = false
-	
-	if move_block == true:
-		if choice == 1:
-			move_block(b1)
-		elif choice == 2:
-			move_block(b2)
-		elif choice == 3:
-			move_block(b1)
-			move_block(b2)
-	else: pass
+
 	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.lives)
 	
-
-	
-# to signal block movement complete after block_cooldown
-func _on_block_cooldown_timeout_complete():
-	_block_movement(gv._block_stop(b1, b2))
-	
-	
-# to start timer and start or stop block
-func _block_movement(state):
-	choice = blocks[randi() % blocks.size()]
-	if state == true:
-		move_block = false
-		block_cooldown.start()
-	if state == false:
-		move_block = true
-		block_cooldown.start()
-
-# to move a block depending upon direction requirement
-func move_block(block):
-	if block == b1:
-		# if left movement allowed move left
-		if move_left == true:
-			b1.position.x -= gv.block_speed
-		# if left movement not allowed move right
-		elif move_left == false:
-			b1.position.x += gv.block_speed
-	if block == b2:
-		# same as b1 but opposite directions
-		if move_right == true:
-			b2.position.x += gv.block_speed
-		elif move_right == false:
-			b2.position.x -= gv.block_speed
 
 # when input is given to move block
 func _input(event):

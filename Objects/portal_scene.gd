@@ -51,13 +51,10 @@ var shots_created = 0 # to track the number of shots created in the portal scene
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	#portal_cooldown = add_timer("portal_cooldown", gv.portal_cooldown_time, "_on_portal_cooldown")
-	#portal_cooldown.start()
 	shots = gv.shot_scenes
-	gv.velocity += 2*gv.velocity
+	gv.velocity = 2*gv.velocity
 	for i in range(shots.size()):
 		shots_index.push_back(i)
-	#$ParallaxBackground/ParallaxLayer.motion_mirroring = $ParallaxBackground/ParallaxLayer/Sprite.texture.get_size().rotated(sprite.global_rotation)
 
 	sb = self.get_node("sb")
 	b1 = self.get_node("block_1")
@@ -91,12 +88,14 @@ func _ready():
 
 # when portal coolown completes
 func _on_portal_cooldown():
+	gv.velocity = gv.velocity/2
+	print("hello: " + str(gv.velocity))
 	get_tree().change_scene("main.tscn")
 
 # add a timer to the main_scene
-func add_timer(timer_name, time, timer_function):
+func add_timer(timer_name, time, timer_function, one_shot=true):
 	var timer = Timer.new()
-	timer.set_one_shot(true)
+	timer.set_one_shot(one_shot)
 	timer.set_wait_time(time)
 	add_child(timer)
 	timer.name = timer_name
@@ -107,37 +106,11 @@ func add_timer(timer_name, time, timer_function):
 func hit(area):
 	var rand_dir = pow(-1, randi() % 2)
 	var pos = Vector2(area.position.x + (rand_dir*20), b1.position.y + 50)
-	
 	var new_shot_index = gv.shot_type_indices["bonus"]
 	var new_shot = shots[new_shot_index].instance()
 	new_shot.position = pos
 	add_child(new_shot)
 	shots_created += 1
-	#self.get_node(new_shot.name).connect("shield_hit", self, "_shield_hit")
-	#self.get_node(new_shot.name).connect("line_hit", self, "_line_hit")
-	
-	
-# to do when shot hits the shield, for various actions such as increasing lives,
-#	bonus to score, increasing shot speed, decreasing lives
-func _shield_hit(node):
-	#gv.background_speed += 100
-	#gv.score += 2
-	#score_label.text = "Score: " + str(gv.score)
-	#print(gv.score)
-	pass	 
-	
-			
-func _line_hit(type):
-	#gv.score -= 1
-	#score_label.text = "Score: " + str(gv.score)
-	#print(gv.score)
-	pass
-
-# to do when shot hits button
-func button_hit(node):
-	#bt_life -= 1
-	if gv.lives == 0:
-		get_tree().change_scene("game over.tscn")
 	
 
 # add new shield to main scene
@@ -150,29 +123,13 @@ func add_shield():
 	add_child(new_shield)
 	self.get_node(new_shield.name).connect("area_entered", self, "shield_hit")
 	
-# to do when shield is hit with a shot, for counting score
-func shield_hit(node):
-	# check shot is from which side and increase shot count accordingly
-	"""if node.position.x < 240:
-		right_shot_count = 0
-		if left_shot_count <= 2: 
-			gv.score += 1
-			left_shot_count += 1
-		else: pass
-	else:
-		left_shot_count = 0
-		if right_shot_count <= 2: 
-			gv.score += 1
-			right_shot_count += 1
-		else: pass
-	score_label.text = "Score: "+ str(gv.score)"""
-	pass
 	
 # set allow shields to true, part of process stop player from spamming shields
 func _on_cooldown_timeout_complete():
 	shield_load -= shield_load_rate
 	if shield_load > 0:
 		shield_timer_cooldown.start()
+		
 		
 # to allow shields to be generated once block_shield_timer is complete
 func _on_block_shield_timeout_complete():
@@ -182,6 +139,8 @@ func _on_block_shield_timeout_complete():
 
 func _process(delta):
 	if shots_created >= gv.portal_shots_limit:
+		gv.velocity = gv.velocity/2
+		print("hello: " + str(gv.velocity))
 		get_tree().change_scene("main.tscn")
 	# do not allow shields to be generated if # of shields generated is greater
 	# 	than the shield limit, in a finite period. 
@@ -222,24 +181,9 @@ func _process(delta):
 	else: pass
 	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.lives)
+	if gv.lives == 0:
+		get_tree().change_scene("game over.tscn")
 	
-# to create binary to feed into _on_block_cooldown_timeout_complete 
-#	this is used to control the movement of the blocks. A lower probability 
-#	of movement is assigned if blocks are closer.
-func _block_stop():
-	"""rng.randomize()
-	var n = rng.randi_range(1, 10)
-	if b2.position.x - b1.position.x > 300:
-		if n < 1: return true
-		else: return false
-	elif b2.position.x - b1.position.x < 280:
-		if n < 8: return true
-		else: return false
-	else:
-		if n < 3: return true
-		else: return false"""
-	#main._block_stop()
-	pass
 	
 # to signal block movement complete after block_cooldown
 func _on_block_cooldown_timeout_complete():
@@ -256,6 +200,7 @@ func _block_movement(state):
 		move_block = true
 		block_cooldown.start()
 
+
 # to move a block depending upon direction requirement
 func move_block(block):
 	if block == b1:
@@ -271,6 +216,7 @@ func move_block(block):
 			b2.position.x += gv.block_speed
 		elif move_right == false:
 			b2.position.x -= gv.block_speed
+
 
 # when input is given to move block
 func _input(event):
