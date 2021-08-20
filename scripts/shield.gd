@@ -1,7 +1,7 @@
 extends Area2D
 
 var timer
-var shield_time = 0.1
+var shield_time = gv.shield_time
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -16,5 +16,5 @@ func _on_timer_complete():
 	queue_free()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _process(delta):
+	self.position.y -= gv.velocity

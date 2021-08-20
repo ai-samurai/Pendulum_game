@@ -3,7 +3,7 @@ extends Node2D
 export (NodePath) var ui_label_value_path
 
 onready var shot = load("res://Objects/shot.tscn")
-onready var shield = load("res://Objects/shield2.tscn")
+onready var shield = load("res://Objects/shield.tscn")
 
 onready var ui_label_value = get_node(ui_label_value_path)
 
@@ -87,10 +87,9 @@ func _ready():
 	#print(sb_color)
 
 # when portal coolown completes
-func _on_portal_cooldown():
-	gv.velocity = gv.velocity/2
-	print("hello: " + str(gv.velocity))
-	get_tree().change_scene("main.tscn")
+#func _on_portal_cooldown():
+#	gv.velocity = gv.velocity/2
+#	get_tree().change_scene("main.tscn")
 
 # add a timer to the main_scene
 func add_timer(timer_name, time, timer_function, one_shot=true):
@@ -140,7 +139,7 @@ func _on_block_shield_timeout_complete():
 func _process(delta):
 	if shots_created >= gv.portal_shots_limit:
 		gv.velocity = gv.velocity/2
-		print("hello: " + str(gv.velocity))
+		print("changing to main scene: " + str(gv.velocity))
 		get_tree().change_scene("main.tscn")
 	# do not allow shields to be generated if # of shields generated is greater
 	# 	than the shield limit, in a finite period. 
@@ -182,6 +181,7 @@ func _process(delta):
 	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.lives)
 	if gv.lives == 0:
+		gv.velocity = gv.velocity/2
 		get_tree().change_scene("game over.tscn")
 	
 	

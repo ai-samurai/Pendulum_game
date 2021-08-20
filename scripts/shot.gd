@@ -31,14 +31,9 @@ func _hit(area):
 	if "shield" in area.name:
 		if type == "normal":
 			gv.score += 2
-		elif type == "health":
-			if gv.lives <= 9:
-				gv.lives += 1
-			else: pass
 		elif type == "bonus":
 			gv.score += 10
-		elif type == "portal":
-			get_tree().change_scene("portal_scene.tscn")
+		else: gv.score += 1
 		queue_free()
 	elif "line" in area.name:
 		if type == "normal":
@@ -53,7 +48,14 @@ func _hit(area):
 			gv.lives -= 2
 		queue_free()
 	elif "button" in area.name:
-		gv.lives -= 1
+		if type == "health":
+			if gv.lives <= 9:
+				gv.lives += 1
+			else: pass
+		elif type == "portal":
+			#get_tree().change_scene("portal_scene.tscn")
+			main.shield_load = -10
+		else: gv.lives -= 1
 		queue_free()
 	else: pass
 			

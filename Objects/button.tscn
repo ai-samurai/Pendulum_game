@@ -12,7 +12,7 @@ shader_param/color = Color( 0.886275, 0.305882, 0.305882, 1 )
 extents = Vector2( 51.7313, 12.1523 )
 
 [node name="Area2D" type="Area2D"]
-scale = Vector2( 2.5, 1.5 )
+scale = Vector2( 0.5, 1 )
 script = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="."]

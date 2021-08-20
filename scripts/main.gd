@@ -27,6 +27,8 @@ var p # pendulum
 var l # line
 var score_label # score label
 var lives_label # player lives label
+var bt_extents # to store the shape of button node
+var screen_size # size of visible screen
 
 
 var left_shot_count = 0 # to stop score increase after x captures on left 
@@ -57,6 +59,8 @@ func _ready():
 	score_label = self.get_node("score_label")
 	lives_label = self.get_node("lives_label")
 	bt.position = gv.bt_pos
+	bt_extents = bt.get_node("CollisionShape2D").shape.extents * bt.scale
+	screen_size = Vector2(get_viewport().get_visible_rect().size.x, get_viewport().get_visible_rect().size.y)
 	
 	# starts when a shield is created
 	shield_timer_cooldown = add_timer("timer_pause", gv.shield_cooldown_time, "_on_cooldown_timeout_complete")
@@ -102,7 +106,7 @@ func create_shot():
 	var new_shot = gv.pick_shot().instance()
 	new_shot.position = Vector2(xpos, p.position.y + 50)
 	add_child(new_shot)
-	print(gv.velocity)
+#	print(gv.velocity)
 		
 
 # to do when shot hits button
@@ -135,8 +139,17 @@ func _on_block_shield_timeout_complete():
 	sb_color.bg_color = Color(255, 255, 255)
 	
 
+func sig(x, n, c):
+	var fx = float((pow(x,c))/(pow(n,(c-1))))
+	#print(x)
+	if x < 0.5: return fx + 0.2
+	elif x < 1: return (0.2 + (1 - (float( (pow((1-x),c))/(pow((1-n),(c-1))) ))))
+	else: return 1.2
+
+
 func _process(delta):
-	
+	gv.velocity = gv.max_velocity * sig((float(gv.score)/float(gv.max_speed_score)), 0.5, 1.5)
+	print(gv.velocity)
 	if gv.lives <= 0:
 		get_tree().change_scene("game over.tscn")
 	# do not allow shields to be generated if # of shields generated is greater
@@ -154,7 +167,13 @@ func _process(delta):
 		shield_allowed = true
 	sb.value = float(shield_load/3.0) * 100
 
-
+	# change direction of button if out of extents
+	if bt.position.x < bt_extents[0]:
+		bt.dir = 1
+	elif bt.position.x > screen_size[0] - bt_extents[0]:
+		bt.dir = -1
+	else: pass
+	
 	score_label.text = "Score: " + str(gv.score)
 	lives_label.text = "Lives: " + str(gv.lives)
 	
@@ -162,12 +181,12 @@ func _process(delta):
 # when input is given to move block
 func _input(event):
 	if event.is_action_pressed("ui_left"):
-		if bt.position.x > gv.bt_pos.x - 120:
-			bt.position.x -= 120
+		if bt.position.x - bt_extents[0] > 0 and bt.dir == 1:
+			bt.dir = -1
 		else: pass
 	if event.is_action_pressed("ui_right"):
-		if bt.position.x < gv.bt_pos.x + 120:
-			bt.position.x += 120
+		if bt.position.x + bt_extents[0] < screen_size[0]:
+			bt.dir = 1
 		else: pass
 		
 	# to create shield if space is pressed and start shield cooldown
